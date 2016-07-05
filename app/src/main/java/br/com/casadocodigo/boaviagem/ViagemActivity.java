@@ -1,12 +1,12 @@
 package br.com.casadocodigo.boaviagem;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,13 +14,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
-
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import br.com.casadocodigo.boaviagem.database.DatabaseHelper;
 
 /**
  * Created by adilson on 04/05/2016.
@@ -30,6 +32,11 @@ public class ViagemActivity extends AppCompatActivity {
     private Date dataChegada, dataSaida;
     private int ano, mes, dia;
     private Button dataChegadaButton, dataSaidaButton;
+
+    private DatabaseHelper helper;
+    private EditText destino, quantidadePessoas, orcamento;
+    private RadioGroup radioGroup;
+    private String id;
 
 
     @Override
@@ -46,9 +53,51 @@ public class ViagemActivity extends AppCompatActivity {
         dataChegadaButton = (Button) findViewById(R.id.dataChegada);
         dataSaidaButton = (Button) findViewById(R.id.dataSaida);
 
+        destino = (EditText) findViewById(R.id.destino);
+        quantidadePessoas = (EditText) findViewById(R.id.quantidadePessoas);
+        orcamento = (EditText) findViewById(R.id.orcamento);
+
+        radioGroup = (RadioGroup) findViewById(R.id.tipoViagem);
+
+        helper = new DatabaseHelper(this);
+
+        id = getIntent().getStringExtra(Constantes.VIAGEM_ID);
+
+        if(id != null){
+            prepararEdicao();
+        }
 
 
     }
+
+    private void prepararEdicao() {
+        SQLiteDatabase db = helper.getReadableDatabase();
+
+        Cursor cursor =
+                db.rawQuery("SELECT TIPO_VIAGEM, DESTINO, DATA_CHEGADA, " +
+                        "DATA_SAIDA, QUANTIDADE_PESSOAS, ORCAMENTO " +
+                        "FROM VIAGEM WHERE ID = ?", new String[]{id});
+        cursor.moveToFirst();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        if(cursor.getInt(0) == Constantes.VIAGEM_LAZER){
+            radioGroup.check(R.id.lazer);
+        }else{
+            radioGroup.check(R.id.negocios);
+        }
+
+        destino.setText(cursor.getString(1));
+        dataChegada = new Date(cursor.getLong(2));
+        dataSaida = new Date(cursor.getLong(3));
+        dataChegadaButton.setText(dateFormat.format(dataChegada));
+        dataSaidaButton.setText(dateFormat.format(dataSaida));
+        quantidadePessoas.setText(cursor.getString(4));
+        orcamento.setText(cursor.getString(5));
+        cursor.moveToNext();
+        cursor.close();
+    }
+
 
     public void selecionarData(View view) {
         showDialog(view.getId());
@@ -102,4 +151,54 @@ public class ViagemActivity extends AppCompatActivity {
         }
 
     }
+
+    private void removerViagem(String id) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String where []  = new String[]{id};
+        db.delete("GASTO", "VIAGEM_ID = ?", where);
+        db.delete("VIAGEM", "ID = ?", where);
+    }
+
+    public void salvarViagem(View view){
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put("DESTINO", destino.getText().toString());
+        values.put("DATA_CHEGADA", dataChegada.getTime());
+        values.put("DATA_SAIDA", dataSaida.getTime());
+        values.put("ORCAMENTO", orcamento.getText().toString());
+        values.put("QUANTIDADE_PESSOAS",
+                quantidadePessoas.getText().toString());
+
+        int tipo = radioGroup.getCheckedRadioButtonId();
+
+        if(tipo == R.id.lazer){
+            values.put("tipo_viagem", Constantes.VIAGEM_LAZER);
+        }else{
+            values.put("tipo_viagem", Constantes.VIAGEM_NEGOCIOS);
+        }
+
+        long resultado;
+
+        if(id == null){
+            resultado = db.insert("VIAGEM", null, values);
+        }else{
+            resultado = db.update("VIAGEM", values, "ID = ?", new String[]{ id });
+        }
+
+        if(resultado != -1 ){
+            Toast.makeText(this, getString(R.string.registro_salvo), Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, getString(R.string.erro_salvar), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        helper.close();
+        super.onDestroy();
+    }
+
+
+
 }
