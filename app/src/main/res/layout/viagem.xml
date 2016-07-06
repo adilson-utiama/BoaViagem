@@ -27,6 +27,7 @@
         <TextView android:text="@string/destino"/>
 
         <EditText
+            android:id="@+id/destino"
             android:inputType="text"/>
 
         <TextView android:text="@string/tipo_da_viagem"/>

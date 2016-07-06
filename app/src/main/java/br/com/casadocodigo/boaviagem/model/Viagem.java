@@ -8,7 +8,6 @@ import java.util.Date;
 public class Viagem {
 
     private Long id;
-    private String descricao;
     private String destino;
     private Integer tipoViagem;
     private Date dataChegada;
@@ -18,10 +17,9 @@ public class Viagem {
 
     public Viagem(){}
 
-    public Viagem(Long id, String descricao, Integer tipoViagem,
+    public Viagem(Long id, String destino, Integer tipoViagem,
                   Date dataChegada, Date dataSaida, Double orcamento, Integer quantidadePessoa ){
         this.id = id;
-        this.descricao = descricao;
         this.tipoViagem = tipoViagem;
         this.dataChegada = dataChegada;
         this.dataSaida = dataSaida;
@@ -35,14 +33,6 @@ public class Viagem {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public String getDestino() {

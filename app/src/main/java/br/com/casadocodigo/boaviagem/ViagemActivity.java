@@ -1,5 +1,6 @@
 package br.com.casadocodigo.boaviagem;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -118,15 +119,23 @@ public class ViagemActivity extends AppCompatActivity {
 
     private DatePickerDialog.OnDateSetListener dataChegadaListener = new DatePickerDialog.OnDateSetListener() {
         public void onDateSet(DatePicker view, int anoSelecionado, int mesSelecionado, int diaSelecionado) {
+            dataChegada = criarData(anoSelecionado, mesSelecionado, diaSelecionado);
             dataChegadaButton.setText(diaSelecionado + "/" + (mesSelecionado + 1) + "/" + anoSelecionado);
         }
     };
 
     private DatePickerDialog.OnDateSetListener dataSaidaListener = new DatePickerDialog.OnDateSetListener() {
         public void onDateSet(DatePicker view, int anoSelecionado, int mesSelecionado, int diaSelecionado) {
+           dataSaida = criarData(anoSelecionado, mesSelecionado, diaSelecionado);
            dataSaidaButton.setText(diaSelecionado + "/" + (mesSelecionado + 1) + "/" + anoSelecionado);
         }
     };
+
+    private Date criarData(int anoSelecionado, int mesSelecionado, int diaSelecionado) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(anoSelecionado, mesSelecionado, diaSelecionado);
+        return calendar.getTime();
+    }
 
 
     @Override
@@ -163,11 +172,11 @@ public class ViagemActivity extends AppCompatActivity {
         SQLiteDatabase db = helper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put("DESTINO", destino.getText().toString());
-        values.put("DATA_CHEGADA", dataChegada.getTime());
-        values.put("DATA_SAIDA", dataSaida.getTime());
-        values.put("ORCAMENTO", orcamento.getText().toString());
-        values.put("QUANTIDADE_PESSOAS",
+        values.put("destino", destino.getText().toString());
+        values.put("data_chegada", dataChegada.getTime());
+        values.put("data_saida", dataSaida.getTime());
+        values.put("orcamento", orcamento.getText().toString());
+        values.put("quantidade_pessoas",
                 quantidadePessoas.getText().toString());
 
         int tipo = radioGroup.getCheckedRadioButtonId();
@@ -181,9 +190,9 @@ public class ViagemActivity extends AppCompatActivity {
         long resultado;
 
         if(id == null){
-            resultado = db.insert("VIAGEM", null, values);
+            resultado = db.insert("viagem", null, values);
         }else{
-            resultado = db.update("VIAGEM", values, "ID = ?", new String[]{ id });
+            resultado = db.update("viagem", values, "ID = ?", new String[]{ id });
         }
 
         if(resultado != -1 ){
@@ -191,6 +200,8 @@ public class ViagemActivity extends AppCompatActivity {
         }else{
             Toast.makeText(this, getString(R.string.erro_salvar), Toast.LENGTH_SHORT).show();
         }
+
+        startActivity(new Intent(this, ViagemListActivity.class));
     }
 
     @Override

@@ -42,6 +42,8 @@
     <string name="valor_limite">Alerta de gastos</string>
     <string name="manter_conectado">Manter conectado</string>
     <string name="erro_selecionar_viagem">Erro ao selecionar viagem</string>
+    <string name="registro_salvo">Registrado com Sucesso!</string>
+    <string name="erro_salvar">Erro ao registrar Viagem.</string>
 
 
     <string-array name="categoria_gasto">
