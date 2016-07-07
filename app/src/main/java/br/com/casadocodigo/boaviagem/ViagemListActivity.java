@@ -12,6 +12,9 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import android.view.ContextMenu;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -254,6 +257,7 @@ public class ViagemListActivity extends ListActivity implements AdapterView.OnIt
         }
         return false;
     }
+
 
 
     ///exemplos de uso SQLIte

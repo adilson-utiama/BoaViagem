@@ -37,6 +37,7 @@ public class ViagemActivity extends AppCompatActivity {
     private DatabaseHelper helper;
     private EditText destino, quantidadePessoas, orcamento;
     private RadioGroup radioGroup;
+
     private String id;
 
 
@@ -62,6 +63,7 @@ public class ViagemActivity extends AppCompatActivity {
 
         helper = new DatabaseHelper(this);
 
+        //captura valores vindo de outra activity
         id = getIntent().getStringExtra(Constantes.VIAGEM_ID);
 
         if(id != null){
@@ -75,9 +77,9 @@ public class ViagemActivity extends AppCompatActivity {
         SQLiteDatabase db = helper.getReadableDatabase();
 
         Cursor cursor =
-                db.rawQuery("SELECT TIPO_VIAGEM, DESTINO, DATA_CHEGADA, " +
-                        "DATA_SAIDA, QUANTIDADE_PESSOAS, ORCAMENTO " +
-                        "FROM VIAGEM WHERE ID = ?", new String[]{id});
+                db.rawQuery("SELECT tipo_viagem, destino, data_chegada, " +
+                        "data_saida, quantidade_pessoas, orcamento " +
+                        "FROM viagem WHERE _id = ?", new String[]{id});
         cursor.moveToFirst();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -164,8 +166,8 @@ public class ViagemActivity extends AppCompatActivity {
     private void removerViagem(String id) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String where []  = new String[]{id};
-        db.delete("GASTO", "VIAGEM_ID = ?", where);
-        db.delete("VIAGEM", "ID = ?", where);
+        db.delete("GASTO", "viagem_id = ?", where);
+        db.delete("VIAGEM", "_id = ?", where);
     }
 
     public void salvarViagem(View view){
@@ -192,7 +194,7 @@ public class ViagemActivity extends AppCompatActivity {
         if(id == null){
             resultado = db.insert("viagem", null, values);
         }else{
-            resultado = db.update("viagem", values, "ID = ?", new String[]{ id });
+            resultado = db.update("viagem", values, "_id = ?", new String[]{ id });
         }
 
         if(resultado != -1 ){

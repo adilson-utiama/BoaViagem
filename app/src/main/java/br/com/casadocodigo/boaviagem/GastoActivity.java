@@ -2,9 +2,12 @@ package br.com.casadocodigo.boaviagem;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,9 +15,15 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Calendar;
+
+import br.com.casadocodigo.boaviagem.database.BoaViagemDAO;
+import br.com.casadocodigo.boaviagem.database.DatabaseHelper;
 
 /**
  * Created by adilson on 04/05/2016.
@@ -25,11 +34,14 @@ public class GastoActivity extends AppCompatActivity {
     private Button dataGasto;
     private Spinner categoria;
 
+    private BoaViagemDAO dao;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.gasto);
+
 
         Calendar calendar = Calendar.getInstance();
         ano = calendar.get(Calendar.YEAR);
@@ -44,8 +56,11 @@ public class GastoActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.categoria_gasto, android.R.layout.simple_spinner_item
         );
-        categoria = (Spinner) findViewById(R.id.categoria);
-        categoria.setAdapter(adapter);
+        this.categoria = (Spinner) findViewById(R.id.categoria);
+        this.categoria.setAdapter(adapter);
+
+        TextView destino = (TextView) findViewById(R.id.destino);
+        destino.setText("Destino Viagem");
     }
 
     public void selecionarData(View view){
@@ -89,4 +104,35 @@ public class GastoActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void registrarGasto(View view){
+        dao = new BoaViagemDAO(this);
+        ContentValues values = getValores();
+        Toast.makeText(this, values.toString(), Toast.LENGTH_LONG).show();
+
+    }
+
+    private ContentValues getValores(){
+        ContentValues values = new ContentValues();
+        Spinner categoria = (Spinner) findViewById(R.id.categoria);
+        String categoriaSelecionada = (String) categoria.getSelectedItem();
+        EditText valor = (EditText) findViewById(R.id.valor);
+        String valorText = valor.getText().toString();
+        Button data = (Button) findViewById(R.id.data);
+        String dataGasto = data.getText().toString();
+        EditText descricaoGasto = (EditText) findViewById(R.id.descricao);
+        String descricao = descricaoGasto.getText().toString();
+        EditText localGasto = (EditText) findViewById(R.id.local);
+        String local = localGasto.getText().toString();
+
+        values.put(DatabaseHelper.Gasto.CATEGORIA, categoriaSelecionada);
+        values.put(DatabaseHelper.Gasto.VALOR, valorText);
+        values.put(DatabaseHelper.Gasto.DATA, dataGasto);
+        values.put(DatabaseHelper.Gasto.DESCRICAO, descricao);
+        values.put(DatabaseHelper.Gasto.LOCAL, local);
+
+        return values;
+
+    }
+
 }
